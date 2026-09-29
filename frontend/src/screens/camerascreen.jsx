@@ -77,7 +77,6 @@ function toDetections(result, frameWidth = 0, frameHeight = 0) {
 export default function CameraView() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-  const streamRef = useRef(null);
   const liveBusyRef = useRef(false);
 
   const {
@@ -92,6 +91,8 @@ export default function CameraView() {
   } = useAppContext();
 
   const [cameraActive, setCameraActive] = useState(false);
+  const [cameraReady, setCameraReady] = useState(false);
+  const [stream, setStream] = useState(null);
   const [liveAI, setLiveAI] = useState(false);
   const [capturedImage, setCapturedImage] = useState(null);
   const [cameraError, setCameraError] = useState("");
@@ -148,8 +149,8 @@ export default function CameraView() {
     const video = videoRef.current;
     const canvas = canvasRef.current;
 
-    if (!video || !canvas || video.readyState < 2) {
-      throw new Error("Camera is not ready yet. Wait for the video feed to start.");
+    if (!video || !canvas || !cameraActive || !cameraReady || video.readyState < 2) {
+      throw new Error("Camera is not ready yet. Wait for the live video feed to start.");
     }
 
     const width = video.videoWidth;
@@ -175,73 +176,80 @@ export default function CameraView() {
   const startCamera = async () => {
     try {
       setCameraError("");
+      setCameraReady(false);
       setSystemStatus("STARTING CAMERA");
 
+      if (!window.isSecureContext && !["localhost", "127.0.0.1"].includes(window.location.hostname)) {
+        throw new Error("Camera access requires HTTPS or localhost. Open the app at http://localhost:5173/.");
+      }
+
       if (!navigator.mediaDevices?.getUserMedia) {
-        throw new Error("Camera access is unavailable. Open the app on localhost/127.0.0.1 and allow camera permission.");
+        throw new Error("Camera access is unavailable in this browser. Use a current Chrome, Edge or Firefox browser.");
       }
 
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
+      stream?.getTracks().forEach(track => track.stop());
+      setStream(null);
+
+      let nextStream;
+      try {
+        nextStream = await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+        });
+      } catch (firstError) {
+        if (firstError?.name !== "OverconstrainedError") throw firstError;
+        nextStream = await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: true,
+        });
       }
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: false,
-        video: {
-          facingMode: { ideal: "environment" },
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-        },
-      });
-
-      streamRef.current = stream;
-
-      if (!videoRef.current) {
-        stream.getTracks().forEach(track => track.stop());
-        throw new Error("Camera video element is not available.");
+      const videoTrack = nextStream.getVideoTracks()[0];
+      if (!videoTrack) {
+        nextStream.getTracks().forEach(track => track.stop());
+        throw new Error("The browser returned no video track.");
       }
 
-      videoRef.current.srcObject = stream;
-      videoRef.current.muted = true;
-      videoRef.current.playsInline = true;
-      await videoRef.current.play();
-
-      setCapturedImage(null);
+      setStream(nextStream);
       setCameraActive(true);
-      setCameraStatus("ACTIVE");
+      setCameraStatus("STARTING");
       setSystemStatus(backendOnline ? "MONITORING" : "BACKEND OFFLINE");
     } catch (error) {
       console.error("Camera start error:", error);
       const name = error?.name;
       const message =
         name === "NotAllowedError"
-          ? "Camera permission was denied. Allow camera access for localhost in browser settings and try again."
+          ? "Camera permission was denied. Allow camera access for localhost in browser settings, then press START CAMERA again."
           : name === "NotFoundError"
-            ? "No camera device was found."
+            ? "No camera device was found. Connect a webcam/camera and try again."
             : name === "NotReadableError"
-              ? "The camera is already being used by another application."
-              : name === "OverconstrainedError"
-                ? "The requested camera mode is unavailable. Try the default camera."
+              ? "The camera is already being used by another application. Close Teams, Zoom, OBS or another camera app and retry."
+              : name === "SecurityError"
+                ? "Browser security blocked camera access. Use http://localhost:5173/ or HTTPS."
                 : error?.message || "Unable to access the camera.";
 
       setCameraError(message);
       setCameraActive(false);
+      setCameraReady(false);
       setCameraStatus("INACTIVE");
       setSystemStatus("CAMERA ERROR");
     }
   };
-
   const stopCamera = () => {
-    streamRef.current?.getTracks().forEach(track => track.stop());
-    streamRef.current = null;
+    stream?.getTracks().forEach(track => track.stop());
+    setStream(null);
     if (videoRef.current) videoRef.current.srcObject = null;
     setLiveAI(false);
     liveBusyRef.current = false;
     setCameraActive(false);
+    setCameraReady(false);
     setCameraStatus("INACTIVE");
     setSystemStatus("READY");
   };
-
   const analyzeCurrentFrame = async () => {
     try {
       setCameraError("");
@@ -305,8 +313,41 @@ export default function CameraView() {
   }, [liveAI, cameraActive, backendOnline]);
 
   useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !stream) return undefined;
+
+    video.srcObject = stream;
+    video.muted = true;
+    video.playsInline = true;
+
+    const startPlayback = async () => {
+      try {
+        await video.play();
+        setCameraReady(true);
+        setCameraStatus("ACTIVE");
+        setSystemStatus(backendOnline ? "MONITORING" : "BACKEND OFFLINE");
+      } catch (error) {
+        console.error("Camera playback error:", error);
+        setCameraReady(false);
+        setCameraError("Camera opened, but the video feed could not start. Press STOP CAMERA and START CAMERA again.");
+        setSystemStatus("CAMERA PLAYBACK ERROR");
+      }
+    };
+
+    if (video.readyState >= 1) {
+      startPlayback();
+    } else {
+      video.onloadedmetadata = startPlayback;
+    }
+
     return () => {
-      streamRef.current?.getTracks().forEach(track => track.stop());
+      video.onloadedmetadata = null;
+    };
+  }, [stream, backendOnline, setCameraStatus, setSystemStatus]);
+
+  useEffect(() => {
+    return () => {
+      stream?.getTracks().forEach(track => track.stop());
     };
   }, []);
 
@@ -333,12 +374,21 @@ export default function CameraView() {
           </div>
 
           <div className="sx-video-frame">
-            {cameraActive ? (
-              <video ref={videoRef} autoPlay playsInline muted />
-            ) : capturedImage ? (
-              <img src={capturedImage} alt="Captured safety frame" />
-            ) : (
-              <video ref={videoRef} autoPlay playsInline muted />
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              aria-label="Live camera feed"
+              style={{ visibility: cameraActive ? "visible" : "hidden" }}
+            />
+
+            {!cameraActive && capturedImage && (
+              <img
+                src={capturedImage}
+                alt="Captured safety frame"
+                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+              />
             )}
 
             {!cameraActive && !capturedImage && (
@@ -370,18 +420,18 @@ export default function CameraView() {
 
           <div className="sx-camera-controls">
             {!cameraActive ? (
-              <button className="sx-primary-action" onClick={startCamera}>
-                START CAMERA <span>↗</span>
+              <button className="sx-primary-action" onClick={startCamera} disabled={cameraActive && !cameraReady}>
+                {cameraActive && !cameraReady ? "STARTING CAMERA…" : "START CAMERA"} <span>↗</span>
               </button>
             ) : (
               <button onClick={stopCamera}>STOP CAMERA</button>
             )}
 
-            <button onClick={analyzeCurrentFrame} disabled={!cameraActive || analyzing || !backendOnline}>
+            <button onClick={analyzeCurrentFrame} disabled={!cameraReady || analyzing || !backendOnline}>
               {analyzing ? "ANALYZING…" : "ANALYZE FRAME"}
             </button>
 
-            <button className={liveAI ? "sx-active-action" : ""} onClick={toggleLiveAI} disabled={!cameraActive || !backendOnline}>
+            <button className={liveAI ? "sx-active-action" : ""} onClick={toggleLiveAI} disabled={!cameraReady || !backendOnline}>
               {liveAI ? "STOP LIVE AI" : "START LIVE AI"}
             </button>
 
