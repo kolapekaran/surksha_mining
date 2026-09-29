@@ -110,6 +110,8 @@ async def detect_all(file: UploadFile = File(...)):
         "fire_or_smoke": any(d["domain"] == "fire_smoke" for d in output["detections"]),
         "ppe_objects": sum(d["domain"] == "ppe" for d in output["detections"]),
     }
+    output["fire"] = output["summary"]["fire_or_smoke"]
+    output["ppe"] = output["summary"]["ppe_objects"] > 0
     return output
 
 
