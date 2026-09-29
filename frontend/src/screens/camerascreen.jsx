@@ -4,7 +4,7 @@ import {
   useState,
 } from "react";
 
-import Overlay from "./overlay";
+import Overlay from "../components/camera/overlay";
 
 import AlertBox from "../alerts/alertbox";
 import SoundAlert from "../alerts/soundalert";
@@ -622,8 +622,6 @@ function CameraView() {
           );
       }
 
-
-      disconnectSocket();
     };
 
   }, []);
