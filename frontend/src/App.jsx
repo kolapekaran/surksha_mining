@@ -8,6 +8,7 @@ import CameraScreen from "./screens/camerascreen";
 import Dashboard from "./screens/dashboard";
 import ReportScreen from "./screens/reportscreen";
 import SimulationScreen from "./screens/simulationscreen";
+import SafetyTraining from "./screens/safetytraining";
 
 function AppContent() {
   const [activeScreen, setActiveScreen] = useState("camera");
@@ -29,6 +30,9 @@ function AppContent() {
       case "simulation":
         return <SimulationScreen />;
 
+      case "training":
+        return <SafetyTraining />;
+
       default:
         return <CameraScreen />;
     }
@@ -40,6 +44,7 @@ function AppContent() {
     { id: "dashboard", label: "Dashboard" },
     { id: "reports", label: "Reports" },
     { id: "simulation", label: "Simulation" },
+    { id: "training", label: "Safety Training Game" },
   ];
 
   return (

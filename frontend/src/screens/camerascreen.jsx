@@ -12,13 +12,13 @@ import RiskMeter from "../ui/riskmeter";
 
 import {
   analyzeFrame,
-} from "../../services/api";
+} from "../services/api";
 
 import {
   connectSocket,
   disconnectSocket,
   socket,
-} from "../../services/socket";
+} from "../services/socket";
 
 import {
   useAppContext,
