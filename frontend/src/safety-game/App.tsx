@@ -62,12 +62,12 @@ function Home({t,go,openModule,startTraining,startScenario,dialog,imgStyle}:Pick
 function SafetyGame({mode,setMode,go,dialog}:{mode:string;setMode:(s:string)=>void;go:(p:Page)=>void;dialog:(d:{title:string;body:string}|null)=>void}){
  const [apiStatus,setApiStatus]=useState('CHECKING');
  const [backendMissions,setBackendMissions]=useState<string[]>([]);
- const [learnerId,setLearnerId]=useState('');
+ const [learnerId]=useState(()=>window.localStorage.getItem('suraksha_learner_id')||window.crypto?.randomUUID?.()||('learner_'+Date.now()+'_'+Math.random().toString(36).slice(2,10)));
  const [savedProgressCount,setSavedProgressCount]=useState(0);
  const [backendScenario,setBackendScenario]=useState<{title?:string;objective?:string;briefing?:string}|null>(null);
  const scenarioRequest=useRef(0);
  useEffect(()=>{let active=true;Promise.all([fetch('/health'),fetch('/game/missions')]).then(async([healthResponse,missionsResponse])=>{if(!healthResponse.ok||!missionsResponse.ok)throw new Error('API unavailable');const catalog=await missionsResponse.json();if(active){setBackendMissions(Array.isArray(catalog.missions)?catalog.missions.map((m:{id?:string})=>m.id).filter((id:string|undefined):id is string=>Boolean(id)):[]);setApiStatus('CONNECTED · MISSION CATALOG LOADED');}}).catch(()=>{if(active)setApiStatus('OFFLINE')});return()=>{active=false}},[]);
- useEffect(()=>{let id=window.localStorage.getItem('suraksha_learner_id');if(!id){id=window.crypto?.randomUUID?.()||`learner_${Date.now()}_${Math.random().toString(36).slice(2,10)}`;window.localStorage.setItem('suraksha_learner_id',id)}setLearnerId(id);let active=true;fetch(`/game/progress/${id}`).then(async response=>{if(!response.ok)throw new Error('Progress unavailable');return response.json()}).then(data=>{if(active&&Array.isArray(data.progress))setSavedProgressCount(data.progress.length)}).catch(()=>{});return()=>{active=false}},[]);
+ useEffect(()=>{window.localStorage.setItem('suraksha_learner_id',learnerId);let active=true;fetch('/game/progress/'+learnerId).then(async response=>{if(!response.ok)throw new Error('Progress unavailable');return response.json()}).then(data=>{if(active&&Array.isArray(data.progress))setSavedProgressCount(data.progress.length)}).catch(()=>{});return()=>{active=false}},[learnerId]);
  const stats=[['⚠','Risk Score','28','↓ −12%'],['★','Points','1,240','↑ +150'],['🏅','Badge','5','Badges Earned'],['▥','Progress','68%','Level 4 · 1,240 XP']];
  const modes=[['Hazard Detection','Find and mark safety hazards','+100 XP · Easy','🔥'],['PPE Challenge','Wear the correct PPE','+150 XP · Easy','🦺'],['Emergency Response','Take the right actions','+200 XP · Medium','🚨'],['Time Attack','Answer quickly and safely','+250 XP · Hard','⚡']];
  const [step,setStep]=useState(0),[score,setScore]=useState(0),[risk,setRisk]=useState(28),[seconds,setSeconds]=useState(60),[selected,setSelected]=useState<number[]>([]),[activeMission,setActiveMission]=useState('fire');
