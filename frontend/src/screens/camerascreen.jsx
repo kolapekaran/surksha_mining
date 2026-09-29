@@ -291,8 +291,8 @@ export default function CameraView() {
       return;
     }
 
-    if (!cameraActive) {
-      setCameraError("Start the camera before enabling Live AI.");
+    if (!cameraReady) {
+      setCameraError("Wait for the live camera feed to become ready before enabling Live AI.");
       return;
     }
 
@@ -349,7 +349,7 @@ export default function CameraView() {
     return () => {
       stream?.getTracks().forEach(track => track.stop());
     };
-  }, []);
+  }, [stream]);
 
   return (
     <section className="sx-page sx-camera-page">
