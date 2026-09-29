@@ -4,6 +4,7 @@ function BoundingBox({ detection }) {
 
   return (
     <div
+      className="sx-bounding-box"
       style={{
         position: "absolute",
         left: `${detection.x}%`,
@@ -18,6 +19,7 @@ function BoundingBox({ detection }) {
       }}
     >
       <div
+        className="sx-bounding-label"
         style={{
           position: "absolute",
           top: "-29px",
