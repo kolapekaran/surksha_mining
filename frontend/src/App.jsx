@@ -1,8 +1,5 @@
-
 import { useState } from "react";
-
 import { AppProvider } from "./context/appcontext";
-
 import Home from "./screens/home";
 import CameraScreen from "./screens/camerascreen";
 import Dashboard from "./screens/dashboard";
@@ -11,109 +8,30 @@ import SimulationScreen from "./screens/simulationscreen";
 import SafetyTraining from "./screens/safetytraining";
 
 function AppContent() {
-  const [activeScreen, setActiveScreen] = useState("camera");
-
-  const renderScreen = () => {
-    switch (activeScreen) {
-      case "home":
-        return <Home />;
-
-      case "camera":
-        return <CameraScreen />;
-
-      case "dashboard":
-        return <Dashboard />;
-
-      case "reports":
-        return <ReportScreen />;
-
-      case "simulation":
-        return <SimulationScreen />;
-
-      case "training":
-        return <SafetyTraining />;
-
-      default:
-        return <CameraScreen />;
-    }
-  };
-
+  const [activeScreen, setActiveScreen] = useState("home");
   const navigationItems = [
-    { id: "home", label: "Home" },
-    { id: "camera", label: "Camera Monitoring" },
-    { id: "dashboard", label: "Dashboard" },
-    { id: "reports", label: "Reports" },
-    { id: "simulation", label: "Simulation" },
-    { id: "training", label: "Safety Training Game" },
+    ["home","COMMAND"],
+    ["camera","VISION"],
+    ["dashboard","INTELLIGENCE"],
+    ["reports","EVIDENCE"],
+    ["simulation","SIMULATOR"],
+    ["training","TRAINING"]
   ];
+  const renderScreen=()=>({
+    home:<Home/>,camera:<CameraScreen/>,dashboard:<Dashboard/>,reports:<ReportScreen/>,simulation:<SimulationScreen/>,training:<SafetyTraining/>
+  }[activeScreen]||<Home/>);
 
-  return (
-    <div
-      className="suraksha-shell"
-      style={{
-        minHeight: "100vh",
-        backgroundColor: "#0f172a",
-        color: "#ffffff",
-      }}
-    >
-      <nav
-        className="sx-topbar sx-nav"
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "10px",
-          padding: "15px 20px",
-          backgroundColor: "#111827",
-          borderBottom: "1px solid #334155",
-        }}
-      >
-        <strong
-          className="sx-brand"
-          style={{
-            marginRight: "20px",
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
-          Safety AI
-        </strong>
-
-        {navigationItems.map((item) => {
-          const isActive = activeScreen === item.id;
-
-          return (
-            <button
-              key={item.id}
-              onClick={() => setActiveScreen(item.id)}
-              style={{
-                padding: "10px 15px",
-                border: "none",
-                borderRadius: "6px",
-                backgroundColor: isActive
-                  ? "#2563eb"
-                  : "#334155",
-                color: "#ffffff",
-                fontWeight: isActive ? "bold" : "normal",
-                cursor: "pointer",
-              }}
-            >
-              {item.label}
-            </button>
-          );
-        })}
-      </nav>
-
-      <main>{renderScreen()}</main>
-    </div>
-  );
+  return <div className="suraksha-shell">
+    <nav className="sx-topbar">
+      <div className="sx-nav-inner">
+        <button className="sx-brand sx-brand-button" onClick={()=>setActiveScreen("home")}><span className="sx-brand-mark">S</span><span><b>SURAKSHA</b><small>SAFETY INTELLIGENCE SYSTEM</small></span></button>
+        <div className="sx-main-nav">{navigationItems.map(([id,label],i)=><button key={id} className={"sx-nav-item "+(activeScreen===id?"active":"")} onClick={()=>setActiveScreen(id)}><span>0{i+1}</span>{label}</button>)}</div>
+        <div className="sx-top-status"><span className="sx-live-dot"/> CONTROL LINK <b>READY</b></div>
+      </div>
+    </nav>
+    <main className="sx-app-main" key={activeScreen}>{renderScreen()}</main>
+    <div className="sx-footer-bar"><span>SURAKSHA // INDUSTRIAL SAFETY</span><span>LOCAL CONTROL NODE</span><span>v1.0 · OPERATIONAL UI</span></div>
+  </div>;
 }
-
-function App() {
-  return (
-    <AppProvider>
-      <AppContent />
-    </AppProvider>
-  );
-}
-
+function App(){return <AppProvider><AppContent/></AppProvider>}
 export default App;
