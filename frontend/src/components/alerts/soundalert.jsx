@@ -60,6 +60,7 @@ function SoundAlert({ enabled = true, risk = "LOW" }) {
 
   return (
     <button
+      className="sx-sound-alert"
       onClick={playAlertSound}
       disabled={!enabled || risk === "LOW"}
       style={{
