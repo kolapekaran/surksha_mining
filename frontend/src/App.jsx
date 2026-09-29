@@ -49,6 +49,7 @@ function AppContent() {
 
   return (
     <div
+      className="suraksha-shell"
       style={{
         minHeight: "100vh",
         backgroundColor: "#0f172a",
@@ -56,6 +57,7 @@ function AppContent() {
       }}
     >
       <nav
+        className="sx-topbar sx-nav"
         style={{
           display: "flex",
           flexWrap: "wrap",
@@ -66,6 +68,7 @@ function AppContent() {
         }}
       >
         <strong
+          className="sx-brand"
           style={{
             marginRight: "20px",
             display: "flex",
