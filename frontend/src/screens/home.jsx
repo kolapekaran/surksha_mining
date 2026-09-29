@@ -9,7 +9,7 @@ const statusClass = (value) => {
 };
 
 function Metric({ label, value, sub, tone = "" }) {
-  return <div className="sx-metric"><div className="sx-metric-label">{label}</div><div className={\`sx-metric-value \${tone}\`}>{value}</div><div className="sx-metric-sub">{sub}</div></div>;
+  return <div className="sx-metric"><div className="sx-metric-label">{label}</div><div className={`sx-metric-value ${tone}`}>{value}</div><div className="sx-metric-sub">{sub}</div></div>;
 }
 
 export default function Home() {
@@ -18,7 +18,7 @@ export default function Home() {
   const highRisk = detections.filter(d => ["HIGH","CRITICAL"].includes(String(d.risk).toUpperCase())).length;
 
   return <section className="sx-page sx-command-page">
-    <div className="sx-page-heading"><div><div className="sx-eyebrow">COMMAND CENTER / LIVE OVERVIEW</div><h1>Safety Operations <span>Control</span></h1><p>Real-time situational awareness for industrial and mining safety operations.</p></div><div className="sx-clock-card"><div className="sx-clock-label">SYSTEM STATE</div><div className={\`sx-state \${statusClass(systemStatus)}\`}><span />{String(systemStatus).toUpperCase()}</div><small>ZONE 01 • PRIMARY NODE</small></div></div>
+    <div className="sx-page-heading"><div><div className="sx-eyebrow">COMMAND CENTER / LIVE OVERVIEW</div><h1>Safety Operations <span>Control</span></h1><p>Real-time situational awareness for industrial and mining safety operations.</p></div><div className="sx-clock-card"><div className="sx-clock-label">SYSTEM STATE</div><div className={`sx-state ${statusClass(systemStatus)}`}><span />{String(systemStatus).toUpperCase()}</div><small>ZONE 01 • PRIMARY NODE</small></div></div>
 
     <div className="sx-command-grid">
       <div className="sx-hero-panel"><div className="sx-panel-grid" /><div className="sx-hero-content"><div className="sx-hero-kicker"><span /> OPERATIONAL READINESS</div><h2>Protect every<br /><em>decision.</em></h2><p>Monitor hazards, validate AI detections and move from observation to response without leaving the command layer.</p><div className="sx-hero-actions"><div className="sx-command-chip"><b>01</b> LIVE MONITORING</div><div className="sx-command-chip"><b>02</b> AI ANALYSIS</div><div className="sx-command-chip"><b>03</b> RESPONSE</div></div></div><div className="sx-radar"><div /><span /><b>01</b></div></div>
