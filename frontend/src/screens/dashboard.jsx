@@ -1,30 +1,27 @@
 import { useAppContext } from "../context/appcontext";
 
-function Dashboard() {
-  const { mlData, detections = [], alerts = [], cameraStatus = "INACTIVE", backendOnline = false } = useAppContext();
-  const fire = Boolean(mlData?.fire);
-  const helmet = Boolean(mlData?.ppe);
-  const fatigue = Boolean(mlData?.fatigue);
-  const risk = Math.max(0, Math.min(100, Number(mlData?.riskScore || 0)));
-
-  const cards = [
-    {code:"F01",label:"FIRE / SMOKE",value:fire?"DETECTED":"CLEAR",sub:"Thermal / visual hazard state",tone:fire?"danger":"safe",icon:"🔥"},
-    {code:"P02",label:"PPE COMPLIANCE",value:helmet?"COMPLIANT":"CHECK REQUIRED",sub:"Protective equipment signal",tone:helmet?"safe":"warn",icon:"◈"},
-    {code:"F03",label:"FATIGUE",value:fatigue?"FLAGGED":"CLEAR",sub:"Worker condition signal",tone:fatigue?"danger":"safe",icon:"◌"},
-    {code:"R04",label:"RISK INDEX",value:risk+"%",sub:"Aggregated current risk",tone:risk>=70?"danger":risk>=30?"warn":"safe",icon:"△"}
-  ];
-
-  return <div className="suraksha-screen sx-dashboard"><div className="sx-page">
-    <header className="sx-screen-head"><div><span className="sx-panel-code">ANALYTICS / 201</span><h1>Safety intelligence</h1><p>Live operational signals consolidated into a single risk picture.</p></div><div className="sx-head-metrics"><div><small>AI BACKEND</small><b className={backendOnline?"good":"bad"}>{backendOnline?"ONLINE":"OFFLINE"}</b></div><div><small>CAMERA</small><b>{cameraStatus}</b></div></div></header>
-
-    <section className="sx-dashboard-kpis">{cards.map(c=><article className={"sx-dash-card "+c.tone} key={c.code}><span className="sx-card-code">{c.code}</span><span className="sx-dash-icon">{c.icon}</span><small>{c.label}</small><strong>{c.value}</strong><p>{c.sub}</p></article>)}</section>
-
-    <section className="sx-dashboard-grid">
-      <article className="sx-panel sx-risk-orbit"><div className="sx-panel-head"><div><span className="sx-panel-code">RISK / 202</span><h2>Current risk envelope</h2></div><span className={"sx-risk-state "+(risk>=70?"danger":risk>=30?"warn":"safe")}>{risk>=70?"HIGH":risk>=30?"ELEVATED":"CONTROLLED"}</span></div><div className="sx-orbit-wrap"><div className="sx-orbit o1"/><div className="sx-orbit o2"/><div className="sx-orbit o3"/><div className="sx-orbit-core"><strong>{risk}</strong><small>RISK INDEX</small></div><span className="sx-orbit-node a">FIRE</span><span className="sx-orbit-node b">PPE</span><span className="sx-orbit-node c">FATIGUE</span></div><div className="sx-scale"><span>0 SAFE</span><span>30 WATCH</span><span>60 HIGH</span><span>100 CRITICAL</span></div></article>
-      <article className="sx-panel sx-event-panel"><div className="sx-panel-head"><div><span className="sx-panel-code">EVENTS / 203</span><h2>Detection stream</h2></div><span className="sx-count-badge">{detections.length}</span></div>{detections.length?<div className="sx-event-list">{detections.map((d,i)=><div className="sx-event" key={d.id||i}><span className="sx-event-time">LIVE</span><div><b>{d.label}</b><small>{d.confidence==null?"Model signal":"Confidence "+d.confidence+"%"}</small></div><strong>{d.risk}</strong></div>)}</div>:<div className="sx-empty-state"><span>◎</span><b>STREAM CLEAR</b><small>No detection records are currently present.</small></div>}</article>
-    </section>
-
-    <section className="sx-status-matrix"><div className="sx-section-title"><div><span className="sx-panel-code">SYSTEM / 204</span><h2>Control matrix</h2></div><span>LIVE CONTEXT</span></div><div className="sx-matrix-grid"><div><span>VISION SENSOR</span><b className={cameraStatus==="ACTIVE"?"good":"warn"}>{cameraStatus}</b></div><div><span>AI PIPELINE</span><b className={backendOnline?"good":"bad"}>{backendOnline?"CONNECTED":"OFFLINE"}</b></div><div><span>DETECTIONS</span><b>{detections.length.toString().padStart(2,"0")}</b></div><div><span>ALERT QUEUE</span><b className={alerts.length?"warn":"good"}>{alerts.length.toString().padStart(2,"0")}</b></div></div></section>
-  </div></div>;
+function StatusCard({ code, label, value, detail, tone }) {
+  return <article className={\`sx-ai-card \${tone}\`}><div className="sx-ai-code">{code}</div><div className="sx-ai-label">{label}</div><div className="sx-ai-value">{value}</div><div className="sx-ai-detail">{detail}</div><div className="sx-ai-scan" /></article>;
 }
-export default Dashboard;
+
+export default function Dashboard() {
+  const { mlData, detections = [], alerts = [], cameraStatus = "INACTIVE", backendOnline = false } = useAppContext();
+  const fire = Boolean(mlData?.fire), ppe = Boolean(mlData?.ppe), fatigue = Boolean(mlData?.fatigue);
+  const risk = Math.max(0, Math.min(100, Number(mlData?.riskScore || 0)));
+  const riskTone = risk >= 85 ? "critical" : risk >= 60 ? "high" : risk >= 30 ? "medium" : "safe";
+
+  return <section className="sx-page">
+    <div className="sx-page-heading"><div><div className="sx-eyebrow">AI SAFETY ENGINE / DIAGNOSTICS</div><h1>Intelligence <span>Matrix</span></h1><p>Current machine-vision state and safety inference signals.</p></div><div className="sx-live-badge"><span /> {backendOnline ? "INFERENCE LINK ACTIVE" : "INFERENCE LINK OFFLINE"}</div></div>
+    <div className="sx-ai-grid">
+      <StatusCard code="F-01" label="FIRE / SMOKE" value={fire ? "DETECTED" : "CLEAR"} detail="VISUAL CLASSIFIER" tone={fire ? "critical" : "safe"} />
+      <StatusCard code="P-02" label="PPE COMPLIANCE" value={ppe ? "COMPLIANT" : "VIOLATION"} detail="HELMET DETECTION" tone={ppe ? "safe" : "high"} />
+      <StatusCard code="F-03" label="FATIGUE" value={fatigue ? "DETECTED" : "CLEAR"} detail="WORKER STATE" tone={fatigue ? "high" : "safe"} />
+      <StatusCard code="R-04" label="COMPOSITE RISK" value={\`\${risk}%\`} detail="FUSED RISK SCORE" tone={riskTone} />
+    </div>
+    <div className="sx-analysis-grid">
+      <section className="sx-risk-orbit"><div className="sx-section-head"><div><span className="sx-section-code">ANALYSIS / 01</span><h2>Risk field</h2></div><span>0—100 SCALE</span></div><div className="sx-orbit-wrap"><div className={\`sx-orbit sx-orbit-\${riskTone}\`}><div className="sx-orbit-inner"><strong>{risk}</strong><span>RISK</span></div></div><div className="sx-orbit-label left">LOW<br /><b>0—29</b></div><div className="sx-orbit-label right">CRITICAL<br /><b>85—100</b></div></div><div className="sx-risk-footer"><span>MODEL STATUS</span><b className={backendOnline ? "good" : "warn"}>{backendOnline ? "PROCESSING" : "WAITING FOR BACKEND"}</b></div></section>
+      <section className="sx-event-panel"><div className="sx-section-head"><div><span className="sx-section-code">ANALYSIS / 02</span><h2>Detection stream</h2></div><span>{detections.length} EVENTS</span></div>{detections.length === 0 ? <div className="sx-empty"><div className="sx-empty-ring">✓</div><b>NO ACTIVE DETECTIONS</b><span>Start camera monitoring to populate the stream.</span></div> : <div className="sx-event-list">{detections.slice(0,8).map((d,i)=><div className="sx-event-row" key={d.id || i}><span className="sx-event-num">{String(i+1).padStart(2,"0")}</span><div><b>{d.label || "Detection"}</b><small>CONFIDENCE {d.confidence ?? "—"}%</small></div><strong className={String(d.risk).toLowerCase()}>{d.risk || "UNKNOWN"}</strong></div>)}</div>}</section>
+    </div>
+    <div className="sx-bottom-strip"><div><span>CAMERA</span><b>{String(cameraStatus).toUpperCase()}</b></div><div><span>ALERT QUEUE</span><b>{alerts.length.toString().padStart(2,"0")}</b></div><div><span>DETECTIONS</span><b>{detections.length.toString().padStart(2,"0")}</b></div><div><span>ENGINE</span><b>{backendOnline ? "ONLINE" : "OFFLINE"}</b></div></div>
+  </section>;
+}
