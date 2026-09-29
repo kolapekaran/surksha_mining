@@ -24,7 +24,7 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-API docs: http://127.0.0.1:8000/docs
+Run API tests from the `backend/` directory with `python -m pytest -q`.\n\nAPI docs: http://127.0.0.1:8000/docs
 Health: http://127.0.0.1:8000/health
 
 The unified API includes:
@@ -50,7 +50,7 @@ Open http://localhost:5173. Vite proxies API requests to the FastAPI service on 
 
 ## ML status and limitations
 
-The repository tree includes `backend/ai_safety_system/ml_service/models/fire_smoke.pt`, `ppe_model.pt`, and `risk_model.pkl`. The unified image endpoint currently loads the two YOLO files lazily and caches loaded models. Risk model deserialization is intentionally not automatic. Fatigue, machinery and electrical detection do not have a verified unified image inference implementation and are reported unavailable.
+The repository tree includes `backend/ai_safety_system/ml_service/models/fire_smoke.pt`, `ppe_model.pt`, and `risk_model.pkl`. The repository tree confirms these artifact files exist: `fire_smoke.pt` (about 6.2 MB), `ppe_model.pt` (about 6.3 MB), and `risk_model.pkl` (about 83 KB). The unified image endpoint currently loads the two YOLO files lazily and caches loaded models. Risk model deserialization is intentionally not automatic. Fatigue, machinery and electrical detection do not have a verified unified image inference implementation and are reported unavailable.
 
 Install the listed Python requirements before starting the API. Model loading/inference requires compatible PyTorch/Ultralytics and hardware. If the weights are missing from a local checkout, place trusted trained files in `backend/ai_safety_system/ml_service/models/` using the documented filenames. Do not rename unrelated training checkpoints without checking their class labels and intended domain.
 
