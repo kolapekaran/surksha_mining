@@ -650,6 +650,7 @@ function CameraView() {
 
   return (
     <div
+      className="suraksha-screen camera-screen"
       style={{
         width: "100%",
         maxWidth: "900px",
