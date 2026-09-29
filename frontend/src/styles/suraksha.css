@@ -407,3 +407,67 @@ button:focus-visible{outline:2px solid var(--sx-cyan);outline-offset:3px}
 @media(prefers-reduced-motion:reduce){
   *,*:before,*:after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important}
 }
+
+/* Component motion layer */
+.sx-alert-box{
+  position:relative;
+  overflow:hidden;
+  animation:sxAlertIn .35s cubic-bezier(.22,1,.36,1) both;
+  box-shadow:0 12px 34px rgba(0,0,0,.28);
+}
+.sx-alert-box:before{
+  content:"";
+  position:absolute;
+  left:0;top:0;bottom:0;width:3px;
+  background:currentColor;
+  opacity:.8;
+  animation:sxAlertBar 1.2s ease-in-out infinite;
+}
+.sx-sound-alert{
+  position:relative;
+  overflow:hidden;
+}
+.sx-sound-alert:not(:disabled){
+  animation:sxSoundIdle 2.2s ease-in-out infinite;
+}
+.sx-risk-meter{
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(104,222,255,.15)!important;
+  background:linear-gradient(145deg,#0c1b24,#071119)!important;
+  box-shadow:0 12px 30px rgba(0,0,0,.24);
+}
+.sx-risk-meter:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.055) 50%,transparent 65%);
+  transform:translateX(-120%);
+  animation:sxShimmer 4s ease-in-out infinite;
+  pointer-events:none;
+}
+.sx-risk-fill{
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 0 14px currentColor;
+}
+.sx-risk-fill:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);
+  transform:translateX(-100%);
+  animation:sxShimmer 2.5s linear infinite;
+}
+.sx-bounding-box{
+  animation:sxBoxIn .25s ease both;
+  box-shadow:0 0 12px currentColor,inset 0 0 12px rgba(255,255,255,.08);
+}
+.sx-bounding-label{
+  animation:sxLabelFloat 1.8s ease-in-out infinite;
+  box-shadow:0 5px 18px rgba(0,0,0,.3);
+}
+@keyframes sxAlertBar{0%,100%{opacity:.45}50%{opacity:1}}
+@keyframes sxSoundIdle{0%,100%{box-shadow:0 0 0 rgba(255,83,104,0)}50%{box-shadow:0 0 24px rgba(255,83,104,.16)}}
+@keyframes sxBoxIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
+@keyframes sxLabelFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
