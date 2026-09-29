@@ -4,25 +4,25 @@ import {
   useState,
 } from "react";
 
-import Overlay from "./overlay";
+import Overlay from "../components/camera/overlay";
 
-import AlertBox from "../alerts/alertbox";
-import SoundAlert from "../alerts/soundalert";
-import RiskMeter from "../ui/riskmeter";
+import AlertBox from "../components/alerts/alertbox";
+import SoundAlert from "../components/alerts/soundalert";
+import RiskMeter from "../components/ui/riskmeter";
 
 import {
   analyzeFrame,
-} from "../../services/api";
+} from "../services/api";
 
 import {
   connectSocket,
   disconnectSocket,
   socket,
-} from "../../services/socket";
+} from "../services/socket";
 
 import {
   useAppContext,
-} from "../../context/appcontext";
+} from "../context/appcontext";
 
 
 // ------------------------------------
