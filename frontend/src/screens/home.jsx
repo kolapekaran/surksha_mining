@@ -1,95 +1,42 @@
-
 import { useState } from "react";
 import { useAppContext } from "../context/appcontext";
 
-function Home() {
-  const [showInfo, setShowInfo] = useState(false);
+const statusClass = (value) => {
+  const s = String(value || "").toLowerCase();
+  if (["active","monitoring","ready","online"].some(x => s.includes(x))) return "good";
+  if (["error","failed","critical","offline"].some(x => s.includes(x))) return "danger";
+  return "warn";
+};
 
-  const {
-    detections = [],
-    alerts = [],
-    cameraStatus = "INACTIVE",
-    systemStatus = "READY",
-  } = useAppContext();
-
-  const highRiskCount = detections.filter((detection) => {
-    const risk = String(detection.risk || "").toUpperCase();
-    return risk === "HIGH" || risk === "CRITICAL";
-  }).length;
-
-  const getStatusColor = (status) => {
-    const normalizedStatus = String(status).toUpperCase();
-
-    if (
-      normalizedStatus === "ACTIVE" ||
-      normalizedStatus === "MONITORING" ||
-      normalizedStatus === "READY" ||
-      normalizedStatus === "FRAME_CAPTURED"
-    ) {
-      return "#86efac";
-    }
-
-    if (
-      normalizedStatus === "ERROR" ||
-      normalizedStatus === "FAILED"
-    ) {
-      return "#f87171";
-    }
-
-    if (
-      normalizedStatus === "STARTING" ||
-      normalizedStatus === "STOPPED"
-    ) {
-      return "#facc15";
-    }
-
-    return "#cbd5e1";
-  };
-
-  const cardStyle = {
-    padding: "22px",
-    border: "1px solid #334155",
-    borderRadius: "14px",
-    backgroundColor: "#1e293b",
-    textAlign: "left",
-    boxSizing: "border-box",
-  };
-
-  const smallLabelStyle = {
-    margin: 0,
-    color: "#94a3b8",
-    fontSize: "12px",
-    fontWeight: "700",
-    letterSpacing: "0.8px",
-    textTransform: "uppercase",
-  };
-
-  return (
-    <div className="suraksha-screen sx-home"><div className="sx-page">
-      <header className="sx-command-hero">
-        <div className="sx-hero-copy">
-          <div className="sx-eyebrow"><span className="sx-live-dot" /> SURAKSHA // INDUSTRIAL SAFETY COMMAND</div>
-          <h1>Safety intelligence,<br/><em>in real time.</em></h1>
-          <p>Monitor workplace conditions, surface hazards, and move from detection to response through one operational control layer.</p>
-          <div className="sx-hero-actions"><div className="sx-status-pill"><span className="sx-status-light" /> SYSTEM {String(systemStatus).toUpperCase()}</div><div className="sx-status-pill sx-status-muted">CAMERA {String(cameraStatus).toUpperCase()}</div></div>
-        </div>
-        <div className="sx-hero-radar"><div className="sx-radar-grid" /><div className="sx-radar-ring r1" /><div className="sx-radar-ring r2" /><div className="sx-radar-ring r3" /><div className="sx-radar-sweep" /><div className="sx-radar-core">SX<span>AI</span></div><div className="sx-radar-label l1">LIVE MONITOR</div><div className="sx-radar-label l2">THREAT MAP</div></div>
-      </header>
-      <section className="sx-kpi-grid">
-        <article className="sx-kpi-card cyan"><span className="sx-kpi-index">01</span><small>DETECTIONS</small><strong>{detections.length}</strong><b>CURRENT OBJECTS</b><div className="sx-kpi-line"><i style={{width:Math.min(100,detections.length*12)+"%"}} /></div></article>
-        <article className="sx-kpi-card amber"><span className="sx-kpi-index">02</span><small>ACTIVE ALERTS</small><strong>{alerts.length}</strong><b>{alerts.length?"RESPONSE REQUIRED":"NO ACTIVE EVENTS"}</b><div className="sx-kpi-line"><i style={{width:Math.min(100,alerts.length*20)+"%"}} /></div></article>
-        <article className="sx-kpi-card red"><span className="sx-kpi-index">03</span><small>HIGH / CRITICAL</small><strong>{highRiskCount}</strong><b>RISK EVENTS</b><div className="sx-kpi-line"><i style={{width:Math.min(100,highRiskCount*20)+"%"}} /></div></article>
-        <article className="sx-kpi-card green"><span className="sx-kpi-index">04</span><small>CONTROL STATE</small><strong className="sx-kpi-state">{String(systemStatus).toUpperCase()}</strong><b>PLATFORM STATUS</b><div className="sx-kpi-line"><i style={{width:"100%"}} /></div></article>
-      </section>
-      <section className="sx-home-grid">
-        <article className="sx-panel sx-live-panel"><div className="sx-panel-head"><div><span className="sx-panel-code">LIVE / 001</span><h2>Operational picture</h2></div><span className="sx-live-badge"><span /> LIVE</span></div><div className="sx-ops-visual"><div className="sx-grid-floor" /><div className="sx-ops-node main">CONTROL<br/><b>CENTER</b></div><div className="sx-ops-node n1">CAMERA<br/><b>{String(cameraStatus).toUpperCase()}</b></div><div className="sx-ops-node n2">AI ENGINE<br/><b>{detections.length?"EVENT":"STANDBY"}</b></div><div className="sx-ops-node n3">ALERT BUS<br/><b>{alerts.length?"ACTIVE":"CLEAR"}</b></div><div className="sx-flow f1"/><div className="sx-flow f2"/><div className="sx-flow f3"/></div><div className="sx-ops-footer"><span><i className="dot green"/> SENSOR LINK</span><span><i className="dot cyan"/> AI PIPELINE</span><span><i className="dot amber"/> RESPONSE LAYER</span></div></article>
-        <aside className="sx-panel sx-brief-panel"><div className="sx-panel-head"><div><span className="sx-panel-code">STATUS / 002</span><h2>Situation brief</h2></div></div><div className="sx-brief-item"><span className="sx-brief-icon">◉</span><div><b>Camera network</b><small>{String(cameraStatus).toUpperCase()} · monitoring state</small></div><strong className="good">●</strong></div><div className="sx-brief-item"><span className="sx-brief-icon">!</span><div><b>Safety alerts</b><small>{alerts.length?alerts.length+" event(s) awaiting review":"No active safety alerts"}</small></div><strong className={alerts.length?"warn":"good"}>{alerts.length}</strong></div><div className="sx-brief-item"><span className="sx-brief-icon">◇</span><div><b>Risk records</b><small>{detections.length?detections.length+" detection record(s)":"Awaiting detection data"}</small></div><strong>{detections.length}</strong></div><div className="sx-brief-callout"><span>OPERATOR NOTE</span><p>Use Camera Monitoring for live inspection. Use Simulation to rehearse response paths before an incident.</p></div></aside>
-      </section>
-      <section className="sx-section-block"><div className="sx-section-title"><div><span className="sx-panel-code">MISSION / 003</span><h2>Response modules</h2></div><span>6 OPERATIONAL VIEWS</span></div><div className="sx-module-grid">{[["01","CAMERA","Live visual monitoring","◉"],["02","DASHBOARD","Risk intelligence","◈"],["03","REPORTS","Inspection evidence","▤"],["04","SIMULATION","Response rehearsal","△"],["05","TRAINING","Safety scenarios","◆"],["06","ALERTS","Incident response","!"]].map(([n,t,d,icon])=><div className="sx-module-card" key={n}><span className="sx-module-no">{n}</span><strong>{icon}</strong><h3>{t}</h3><p>{d}</p><span className="sx-module-arrow">↗</span></div>)}</div></section>
-      {showInfo&&<section className="sx-disclosure"><span className="sx-panel-code">PLATFORM NOTE</span><p>Current detection records may use application-level or mock data. A connected production AI backend should be verified separately before treating results as live AI predictions.</p></section>}
-      <button className="sx-info-toggle" onClick={()=>setShowInfo(!showInfo)}>{showInfo?"Hide platform note":"View platform status note"} <span>{showInfo?"−":"+"}</span></button>
-    </div></div>
-  );
+function Metric({ label, value, sub, tone = "" }) {
+  return <div className="sx-metric"><div className="sx-metric-label">{label}</div><div className={\`sx-metric-value \${tone}\`}>{value}</div><div className="sx-metric-sub">{sub}</div></div>;
 }
 
-export default Home;
+export default function Home() {
+  const [showInfo, setShowInfo] = useState(false);
+  const { detections = [], alerts = [], cameraStatus = "INACTIVE", systemStatus = "READY", backendOnline = false } = useAppContext();
+  const highRisk = detections.filter(d => ["HIGH","CRITICAL"].includes(String(d.risk).toUpperCase())).length;
+
+  return <section className="sx-page sx-command-page">
+    <div className="sx-page-heading"><div><div className="sx-eyebrow">COMMAND CENTER / LIVE OVERVIEW</div><h1>Safety Operations <span>Control</span></h1><p>Real-time situational awareness for industrial and mining safety operations.</p></div><div className="sx-clock-card"><div className="sx-clock-label">SYSTEM STATE</div><div className={\`sx-state \${statusClass(systemStatus)}\`}><span />{String(systemStatus).toUpperCase()}</div><small>ZONE 01 • PRIMARY NODE</small></div></div>
+
+    <div className="sx-command-grid">
+      <div className="sx-hero-panel"><div className="sx-panel-grid" /><div className="sx-hero-content"><div className="sx-hero-kicker"><span /> OPERATIONAL READINESS</div><h2>Protect every<br /><em>decision.</em></h2><p>Monitor hazards, validate AI detections and move from observation to response without leaving the command layer.</p><div className="sx-hero-actions"><div className="sx-command-chip"><b>01</b> LIVE MONITORING</div><div className="sx-command-chip"><b>02</b> AI ANALYSIS</div><div className="sx-command-chip"><b>03</b> RESPONSE</div></div></div><div className="sx-radar"><div /><span /><b>01</b></div></div>
+
+      <div className="sx-metrics-panel">
+        <Metric label="Detection Events" value={detections.length.toString().padStart(2,"0")} sub="CURRENT SESSION" />
+        <Metric label="Active Alerts" value={alerts.length.toString().padStart(2,"0")} sub="REQUIRES REVIEW" tone={alerts.length ? "danger" : "good"} />
+        <Metric label="High Risk" value={highRisk.toString().padStart(2,"0")} sub="HIGH / CRITICAL" tone={highRisk ? "danger" : "good"} />
+        <Metric label="AI Backend" value={backendOnline ? "LIVE" : "OFF"} sub="INFERENCE LINK" tone={backendOnline ? "good" : "warn"} />
+      </div>
+    </div>
+
+    <div className="sx-section-head"><div><span className="sx-section-code">SYS / 01</span><h2>Operational telemetry</h2></div><span>LIVE CONTEXT</span></div>
+    <div className="sx-telemetry-grid">
+      <article className="sx-telemetry-card"><div className="sx-card-top"><span>CAMERA NETWORK</span><b className={statusClass(cameraStatus)}>{String(cameraStatus).toUpperCase()}</b></div><div className="sx-big-status">{cameraStatus === "ACTIVE" ? "●" : "○"} <span>VISUAL INPUT</span></div><div className="sx-progress"><i style={{width: cameraStatus === "ACTIVE" ? "92%" : "24%"}} /></div><small>CAPTURE PIPELINE</small></article>
+      <article className="sx-telemetry-card"><div className="sx-card-top"><span>THREAT REGISTER</span><b className={alerts.length ? "danger" : "good"}>{alerts.length ? "ATTENTION" : "CLEAR"}</b></div><div className="sx-threat-list"><div><span className="threat-dot red" />HIGH RISK <b>{highRisk}</b></div><div><span className="threat-dot amber" />ACTIVE ALERTS <b>{alerts.length}</b></div><div><span className="threat-dot green" />NORMAL <b>{Math.max(0, detections.length-highRisk)}</b></div></div></article>
+      <article className="sx-telemetry-card sx-info-card"><div className="sx-card-top"><span>PLATFORM CAPABILITY</span><b className="good">READY</b></div><h3>Observe → Detect → Decide</h3><p>Camera intelligence, risk analysis, scenario simulation and vocational safety training in one operational surface.</p><button onClick={() => setShowInfo(!showInfo)}>{showInfo ? "HIDE SYSTEM NOTES" : "VIEW SYSTEM NOTES"} <span>→</span></button></article>
+    </div>
+    {showInfo && <div className="sx-system-note"><b>DATA INTEGRITY NOTE</b><span>Current UI state is driven by the shared application context. Live AI results require the FastAPI inference service and camera permission.</span></div>}
+  </section>;
+}
