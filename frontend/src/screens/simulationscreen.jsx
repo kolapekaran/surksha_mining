@@ -143,6 +143,7 @@ function SimulationScreen() {
 
   return (
     <div
+      className="suraksha-screen simulation-screen"
       style={{
         minHeight: "100vh",
         padding: "30px",
