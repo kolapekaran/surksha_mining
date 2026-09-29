@@ -66,6 +66,7 @@ function Home() {
 
   return (
     <div
+      className="suraksha-screen home-screen"
       style={{
         minHeight: "100vh",
         padding: "30px 20px 50px",
