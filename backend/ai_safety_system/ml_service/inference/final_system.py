@@ -1,33 +1,9 @@
-import os
+"""ML compatibility entry point. Image inference is served by the unified /detect/all endpoint."""
+from typing import Any
 
-# 🔥 Example (later replace with YOLO real models)
-def run_detection_system():
-    """
-    FINAL ML ENTRY FUNCTION
-    """
-
-    # 🔴 TODO: replace with real detection
-    helmet = False
-    vest = False
-    fatigue = False
-    fire = True
-
-    # 🔥 basic score logic
-    score = 0
-
-    if not helmet:
-        score += 10
-    if not vest:
-        score += 10
-    if fatigue:
-        score += 10
-    if fire:
-        score += 10
-
-    return {
-        "helmet": helmet,
-        "vest": vest,
-        "fatigue": fatigue,
-        "fire": fire,
-        "score": score
-    }
+def run_detection_system(frame: Any = None):
+    if frame is None:
+        return {"helmet":False,"vest":False,"fatigue":False,"fire":False,"score":0,"error":"No image frame supplied; use POST /detect/all for ML inference."}
+    from .detect_all import detect_all
+    result=detect_all(frame)
+    return {"helmet":bool(result.get("ppe")),"vest":False,"fatigue":bool(result.get("fatigue")),"fire":bool(result.get("fire")),"score":0}

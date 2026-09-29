@@ -15,12 +15,6 @@ import {
 } from "../services/api";
 
 import {
-  connectSocket,
-  disconnectSocket,
-  socket,
-} from "../services/socket";
-
-import {
   useAppContext,
 } from "../../context/appcontext";
 
@@ -387,8 +381,6 @@ function CameraView() {
         );
 
 
-        connectSocket();
-
       } catch (error) {
         console.error(
           "Camera error:",
@@ -472,7 +464,6 @@ function CameraView() {
       );
 
 
-      disconnectSocket();
     };
 
 
@@ -529,43 +520,19 @@ function CameraView() {
 
 
   // ------------------------------------
-  // Socket.IO live frame
+  // HTTP live frame analysis
   // ------------------------------------
 
   const emitLiveFrame =
-    () => {
-      if (
-        !socket.connected
-      ) {
-        connectSocket();
-      }
-
-
+    async () => {
       try {
-        const frame =
-          getFrame();
-
-
-        setCapturedImage(
-          frame
-        );
-
-
-        socket.emit(
-          "camera_frame",
-          {
-            cameraId:
-              "cctv-1",
-
-            frame,
-          }
-        );
-
+        const frame = getFrame();
+        setCapturedImage(frame);
+        const result = await analyzeFrame(frame);
+        processResult(result);
       } catch (error) {
-        console.error(
-          "Live frame error:",
-          error
-        );
+        console.error("Live ML frame error:", error);
+        setCameraError(error.message);
       }
     };
 
@@ -608,10 +575,7 @@ function CameraView() {
       }
 
 
-      connectSocket();
-
       emitLiveFrame();
-
 
       liveTimerRef.current =
         setInterval(
@@ -628,91 +592,6 @@ function CameraView() {
         "LIVE AI"
       );
     };
-
-
-  // ------------------------------------
-  // Socket events
-  // ------------------------------------
-
-  useEffect(() => {
-
-    const handleDetection =
-      (payload) => {
-
-        const violations =
-          Array.isArray(
-            payload?.violations
-          )
-            ? payload.violations
-            : [];
-
-
-        const result = {};
-
-
-        violations.forEach(
-          (name) => {
-            result[name] =
-              true;
-          }
-        );
-
-
-        processResult(
-          result
-        );
-      };
-
-
-    const handleAlert =
-      (alert) => {
-
-        setAlerts(
-          (previous) => [
-            alert,
-
-            ...previous.filter(
-              (x) =>
-                x.id !== alert.id
-            ),
-          ]
-        );
-
-
-        setActiveAlert(
-          alert
-        );
-      };
-
-
-    socket.on(
-      "detection_result",
-      handleDetection
-    );
-
-
-    socket.on(
-      "alert",
-      handleAlert
-    );
-
-
-    return () => {
-      socket.off(
-        "detection_result",
-        handleDetection
-      );
-
-      socket.off(
-        "alert",
-        handleAlert
-      );
-    };
-
-  }, [
-    setAlerts,
-    setDetections,
-  ]);
 
 
   // ------------------------------------

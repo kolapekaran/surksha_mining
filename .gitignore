@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+*.log
+.env
+.env.*
+!.env.example
+
+# Node / frontend
+node_modules/
+dist/
+frontend/dist/
+
+# Local runtime data
+*.sqlite3
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ML training outputs (production model artifacts remain tracked)
+**/ml_service/runs/
