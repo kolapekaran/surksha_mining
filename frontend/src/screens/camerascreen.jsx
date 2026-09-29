@@ -6,9 +6,9 @@ import {
 
 import Overlay from "../components/camera/overlay";
 
-import AlertBox from "../alerts/alertbox";
-import SoundAlert from "../alerts/soundalert";
-import RiskMeter from "../ui/riskmeter";
+import AlertBox from "../components/alerts/alertbox";
+import SoundAlert from "../components/alerts/soundalert";
+import RiskMeter from "../components/ui/riskmeter";
 
 import {
   analyzeFrame,
