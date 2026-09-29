@@ -39,6 +39,18 @@ export default defineConfig({
         changeOrigin: true,
       },
 
+      // Safety Game backend routes
+      "/game": {
+        target: "http://127.0.0.1:8000",
+        changeOrigin: true,
+      },
+
+      // Dashboard backend routes
+      "/dashboard": {
+        target: "http://127.0.0.1:8000",
+        changeOrigin: true,
+      },
+
     },
   },
 });
