@@ -43,7 +43,7 @@ function AppContent() {
         </div>
         <div className="sx-header-center"><span className="sx-live-dot" /><span>MONITORING NETWORK</span><i /><span>ZONE 01 / MINING OPERATIONS</span></div>
         <div className="sx-header-status">
-          <div className={\`sx-connection \${backendOnline ? "online" : "offline"}\`}><span />{backendOnline ? "BACKEND ONLINE" : "BACKEND OFFLINE"}</div>
+          <div className={`sx-connection ${backendOnline ? "online" : "offline"}`}><span />{backendOnline ? "BACKEND ONLINE" : "BACKEND OFFLINE"}</div>
           <div className="sx-alert-counter">{alerts.length.toString().padStart(2, "0")} ALERTS</div>
         </div>
       </header>
