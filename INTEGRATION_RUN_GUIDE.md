@@ -63,3 +63,16 @@ Game completion currently returns a validated response but is not saved to a dat
 ## Verification
 
 This integration branch has been edited through GitHub's source API. It has not been checked out in a local build environment in this session, so dependency installation, startup, model inference and end-to-end browser flows remain unverified. Run the commands above and test against site-approved procedures before any real-world use.
+
+
+## Standalone training-game frontend
+
+The existing game is a separate React 18 + TypeScript Vite app; it is not yet mounted inside the main Safety AI navigation. It is configured to run on port 5174 and proxy API paths to FastAPI:
+
+```bash
+cd safety-game-frontend/safety-game-frontend
+npm install
+npm run dev
+```
+
+Open http://localhost:5174. The proxy makes the unified API reachable from the game origin. The current game UI still contains local demonstration content; proxy configuration alone does not connect its progress, mission catalog, or detection screens to the backend.
