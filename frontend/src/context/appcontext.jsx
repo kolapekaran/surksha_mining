@@ -15,6 +15,7 @@ const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
   const [detections, setDetections] = useState([]);
+  const [mlData, setMlData] = useState(null);
 
   const [alerts, setAlerts] = useState([]);
 
@@ -26,10 +27,6 @@ export function AppProvider({ children }) {
 
   const [backendOnline, setBackendOnline] =
     useState(false);
-
-  // -----------------------------
-  // CHECK BACKEND
-  // -----------------------------
 
   useEffect(() => {
     let mounted = true;
@@ -43,10 +40,7 @@ export function AppProvider({ children }) {
         setBackendOnline(true);
         setSystemStatus("BACKEND ONLINE");
 
-        const [
-          serverAlerts,
-          cameras,
-        ] = await Promise.all([
+        const [serverAlerts, cameras] = await Promise.all([
           getAlerts(),
           getCameras(),
         ]);
@@ -59,10 +53,7 @@ export function AppProvider({ children }) {
             : []
         );
 
-        if (
-          Array.isArray(cameras) &&
-          cameras.length > 0
-        ) {
+        if (Array.isArray(cameras) && cameras.length > 0) {
           setCameraStatus(
             cameras[0].online
               ? "READY"
@@ -91,12 +82,9 @@ export function AppProvider({ children }) {
     };
   }, []);
 
-  // -----------------------------
-  // CLEAR DATA
-  // -----------------------------
-
   const clearSafetyData = () => {
     setDetections([]);
+    setMlData(null);
     setAlerts([]);
   };
 
@@ -105,6 +93,9 @@ export function AppProvider({ children }) {
       value={{
         detections,
         setDetections,
+
+        mlData,
+        setMlData,
 
         alerts,
         setAlerts,
