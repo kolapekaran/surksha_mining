@@ -75,4 +75,4 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5174. The proxy makes the unified API reachable from the game origin. The current game UI still contains local demonstration content; proxy configuration alone does not connect its progress, mission catalog, or detection screens to the backend.
+Open http://localhost:5174. The proxy makes the unified API reachable from the game origin. The game UI now checks `/health` and posts successful mission completion to `/game/complete`, mapping its local fire, PPE, spill and remaining missions to the backend's four training IDs. This is a completion validation request only: the API explicitly reports session-only handling and does not persist progress. The game still uses local mission descriptions, action scoring, dashboards and simulator content; mission catalog and detection screens are not yet dynamically backend-driven.
