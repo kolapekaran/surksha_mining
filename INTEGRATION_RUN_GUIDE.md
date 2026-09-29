@@ -1,6 +1,6 @@
 # SURAKSHA integration branch: run guide
 
-This branch uses one React + Vite frontend (`safety-ai-frontend/`) and one FastAPI backend (`backend/`). The training game source is integrated into the main frontend under `safety-ai-frontend/src/safety-game/`; it is rendered directly in the dashboard without an iframe.
+This branch uses one React + Vite frontend (`frontend/`) and one FastAPI backend (`backend/`). The training game source is integrated into the main frontend under `frontend/src/safety-game/`; it is rendered directly in the dashboard without an iframe.
 
 ## Requirements
 
@@ -42,7 +42,7 @@ Legacy `/api/analyze` and `/dashboard/` routes remain mounted for compatibility.
 In another terminal:
 
 ```bash
-cd safety-ai-frontend
+cd frontend
 npm ci
 npm run dev
 ```
@@ -68,4 +68,4 @@ This integration branch has been edited through GitHub's source API. It has not 
 
 ## Unified frontend layout
 
-The active frontend is `safety-ai-frontend/`. The training-game component, data and styles now live under `safety-ai-frontend/src/safety-game/` and are mounted by `src/screens/safetytraining.jsx`. Install dependencies in this frontend with `npm install`, then run `npm run dev` and open http://localhost:5173. The single Vite dev server proxies API requests to FastAPI on port 8000. The game still uses local mission descriptions, action scoring, dashboards and simulator content; backend mission catalog and progress endpoints are connected, but not every screen is dynamically backend-driven.
+The active frontend is `frontend/`. The training-game component, data and styles now live under `frontend/src/safety-game/` and are mounted by `src/screens/safetytraining.jsx`. Install dependencies in this frontend with `npm install`, then run `npm run dev` and open http://localhost:5173. The single Vite dev server proxies API requests to FastAPI on port 8000. The game still uses local mission descriptions, action scoring, dashboards and simulator content; backend mission catalog and progress endpoints are connected, but not every screen is dynamically backend-driven.
