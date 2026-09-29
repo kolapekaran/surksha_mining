@@ -6,6 +6,9 @@ dependencies are reported as unavailable; no synthetic inference is returned.
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
+import json
+import sqlite3
+from datetime import datetime, timezone
 
 import cv2
 import numpy as np
@@ -162,20 +165,81 @@ def game_scenario(mission_id: str):
     raise HTTPException(status_code=404, detail="Scenario not found.")
 
 
+PROGRESS_DB = BACKEND_DIR / "data" / "suraksha_progress.sqlite3"
+
+
+def _progress_connection():
+    PROGRESS_DB.parent.mkdir(parents=True, exist_ok=True)
+    connection = sqlite3.connect(PROGRESS_DB, timeout=10)
+    connection.row_factory = sqlite3.Row
+    connection.execute("""
+        CREATE TABLE IF NOT EXISTS mission_progress (
+            learner_id TEXT NOT NULL,
+            mission_id TEXT NOT NULL,
+            best_score INTEGER NOT NULL,
+            completions INTEGER NOT NULL DEFAULT 1,
+            last_decisions TEXT NOT NULL DEFAULT '[]',
+            updated_at TEXT NOT NULL,
+            PRIMARY KEY (learner_id, mission_id)
+        )
+    """)
+    return connection
+
+
 class CompletionRequest(BaseModel):
+    learner_id: str = Field(min_length=8, max_length=80, pattern=r"^[A-Za-z0-9_-]+$")
     mission_id: str
     score: int = Field(ge=0, le=100)
-    decisions: list[str] = Field(default_factory=list)
+    decisions: list[str] = Field(default_factory=list, max_length=30)
+
+
+@router.get("/game/progress/{learner_id}")
+def game_progress(learner_id: str):
+    if not learner_id.isalnum() and not all(ch.isalnum() or ch in "_-" for ch in learner_id):
+        raise HTTPException(status_code=422, detail="Invalid learner ID.")
+    if not 8 <= len(learner_id) <= 80:
+        raise HTTPException(status_code=422, detail="Learner ID must be 8-80 characters.")
+    with _progress_connection() as connection:
+        rows = connection.execute(
+            "SELECT mission_id, best_score, completions, last_decisions, updated_at "
+            "FROM mission_progress WHERE learner_id = ? ORDER BY updated_at DESC",
+            (learner_id,),
+        ).fetchall()
+    return {
+        "learner_id": learner_id,
+        "progress": [{
+            "mission_id": row["mission_id"],
+            "best_score": row["best_score"],
+            "completions": row["completions"],
+            "last_decisions": json.loads(row["last_decisions"]),
+            "updated_at": row["updated_at"],
+        } for row in rows],
+        "persistence": "LOCAL SQLITE DATABASE; no account authentication",
+    }
 
 
 @router.post("/game/complete")
 def complete_game(payload: CompletionRequest):
     if payload.mission_id not in {m["id"] for m in MISSIONS}:
         raise HTTPException(status_code=404, detail="Scenario not found.")
+    updated_at = datetime.now(timezone.utc).isoformat()
+    with _progress_connection() as connection:
+        connection.execute("""
+            INSERT INTO mission_progress
+                (learner_id, mission_id, best_score, completions, last_decisions, updated_at)
+            VALUES (?, ?, ?, 1, ?, ?)
+            ON CONFLICT(learner_id, mission_id) DO UPDATE SET
+                best_score = MAX(mission_progress.best_score, excluded.best_score),
+                completions = mission_progress.completions + 1,
+                last_decisions = excluded.last_decisions,
+                updated_at = excluded.updated_at
+        """, (payload.learner_id, payload.mission_id, payload.score,
+              json.dumps(payload.decisions), updated_at))
     return {
         "status": "completed",
+        "learner_id": payload.learner_id,
         "mission_id": payload.mission_id,
         "score": payload.score,
         "decisions_recorded": len(payload.decisions),
-        "persistence": "SESSION ONLY; completion is not stored between sessions",
+        "persistence": "SAVED TO LOCAL SQLITE; no account authentication",
     }
