@@ -1,6 +1,6 @@
 # SURAKSHA integration branch: run guide
 
-This branch adds a unified FastAPI API surface while retaining legacy endpoints. It does not yet merge the standalone training-game UI into the main React app.
+This branch uses one React + Vite frontend (`safety-ai-frontend/`) and one FastAPI backend (`backend/`). The training game source is integrated into the main frontend under `safety-ai-frontend/src/safety-game/`; it is rendered directly in the dashboard without an iframe.
 
 ## Requirements
 
@@ -47,7 +47,7 @@ npm ci
 npm run dev
 ```
 
-Open http://localhost:5173. Vite proxies API requests to the FastAPI service on port 8000. The main dashboard's **Safety Training Game** navigation item embeds the standalone game from `http://localhost:5174`.
+Open http://localhost:5173. Vite proxies API requests to the FastAPI service on port 8000. The **Safety Training Game** navigation item renders the integrated game component inside the main React app. All frontend features run on port 5173.
 
 ## ML status and limitations
 
@@ -66,14 +66,6 @@ Successful game completions are saved in `backend/data/suraksha_progress.sqlite3
 This integration branch has been edited through GitHub's source API. It has not been checked out in a local build environment in this session, so dependency installation, startup, model inference and end-to-end browser flows remain unverified. Run the commands above and test against site-approved procedures before any real-world use.
 
 
-## Standalone training-game frontend
+## Unified frontend layout
 
-The existing game is a separate React 18 + TypeScript Vite app; it is not yet mounted inside the main Safety AI navigation. It is configured to run on port 5174 and proxy API paths to FastAPI:
-
-```bash
-cd safety-game-frontend/safety-game-frontend
-npm install
-npm run dev
-```
-
-Open http://localhost:5174. The proxy makes the unified API reachable from the game origin. Keep this server running while using the embedded game in the main dashboard. For a hosted deployment, build and host this game frontend separately, then set `VITE_SAFETY_GAME_URL` in the main frontend build environment to its URL; the iframe does not bundle the second app into the main Vite build. The game UI checks `/health`, loads the `/game/missions` catalog, requests `/game/scenarios/{mission_id}` details when a mission starts, and posts successful completion to `/game/complete`. It stores a browser-local learner ID and fetches saved results from `/game/progress/{learner_id}`. Local missions are mapped to the backend's four training IDs. SQLite progress is local to the backend installation and is not account-authenticated. The game still uses local mission descriptions, action scoring, dashboards and simulator content; mission catalog and detection screens are not yet dynamically backend-driven.
+The active frontend is `safety-ai-frontend/`. The training-game component, data and styles now live under `safety-ai-frontend/src/safety-game/` and are mounted by `src/screens/safetytraining.jsx`. Install dependencies in this frontend with `npm install`, then run `npm run dev` and open http://localhost:5173. The single Vite dev server proxies API requests to FastAPI on port 8000. The game still uses local mission descriptions, action scoring, dashboards and simulator content; backend mission catalog and progress endpoints are connected, but not every screen is dynamically backend-driven.
