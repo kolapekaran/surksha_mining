@@ -1,0 +1,26 @@
+# SURAKSHA development dependencies and generated files
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+node_modules/
+dist/
+.vite/
+*.log
+.env
+.env.*
+!.env.example
+
+# Local datasets and training outputs
+datasets/
+**/datasets/
+runs/
+**/runs/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
