@@ -60,9 +60,7 @@ def health():
 async def detect_all(file: UploadFile = File(...)):
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(status_code=415, detail="Upload a supported image file.")
-    raw = await file.read()
-    if not raw or len(raw) > 12 * 1024 * 1024:
-        raise HTTPException(status_code=413, detail="Image must be non-empty and no larger than 12 MB.")
+    # Read at most the configured limit plus one byte to avoid buffering an\n    # arbitrarily large upload into memory before rejecting it.\n    max_bytes = 12 * 1024 * 1024\n    raw = await file.read(max_bytes + 1)\n    if not raw:\n        raise HTTPException(status_code=400, detail="Uploaded image is empty.")\n    if len(raw) > max_bytes:\n        raise HTTPException(status_code=413, detail="Image must be no larger than 12 MB.")
     image = cv2.imdecode(np.frombuffer(raw, dtype=np.uint8), cv2.IMREAD_COLOR)
     if image is None:
         raise HTTPException(status_code=400, detail="Uploaded file is not a valid image.")
