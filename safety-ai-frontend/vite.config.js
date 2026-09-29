@@ -1,55 +1,19 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
+const backend = process.env.VITE_BACKEND_ORIGIN || "http://127.0.0.1:8000";
+
 export default defineConfig({
   plugins: [react()],
-
   server: {
-    host: "localhost",
-
+    host: "0.0.0.0",
     port: 5173,
-
     proxy: {
-
-      // --------------------------
-      // Normal FastAPI routes
-      // --------------------------
-
-      "/api": {
-        target: "http://127.0.0.1:5000",
-        changeOrigin: true,
-      },
-
-      // --------------------------
-      // Health
-      // --------------------------
-
-      "/health": {
-        target: "http://127.0.0.1:5000",
-        changeOrigin: true,
-      },
-
-      // --------------------------
-      // ML API
-      // POST /detect/all
-      // --------------------------
-
-      "/detect": {
-        target: "http://127.0.0.1:5000",
-        changeOrigin: true,
-      },
-
-      // --------------------------
-      // Socket.IO
-      // --------------------------
-
-      "/socket.io": {
-        target: "http://127.0.0.1:5000",
-
-        changeOrigin: true,
-
-        ws: true,
-      },
+      "/api": { target: backend, changeOrigin: true },
+      "/dashboard": { target: backend, changeOrigin: true },
+      "/health": { target: backend, changeOrigin: true },
+      "/detect": { target: backend, changeOrigin: true },
+      "/socket.io": { target: backend, changeOrigin: true, ws: true },
     },
   },
 });
