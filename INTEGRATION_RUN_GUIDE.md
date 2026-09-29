@@ -32,7 +32,8 @@ The unified API includes:
 - `POST /detect/all` — image upload inference using available YOLO weights
 - `POST /api/simulation/run` — clearly labelled illustrative training calculation
 - `GET /game/missions` and `GET /game/scenarios/{mission_id}` — scenario metadata
-- `POST /game/complete` — validates a completion payload but does not persist it
+- `POST /game/complete` — validates and saves a completion to a local SQLite database (requires a browser-generated learner ID)
+- `GET /game/progress/{learner_id}` — returns saved mission scores, completion counts, and the latest selected decisions
 
 Legacy `/api/analyze` and `/dashboard/` routes remain mounted for compatibility. Some legacy services may still use fixed or synthetic inputs and should not be treated as live detection.
 
@@ -58,7 +59,7 @@ Install the listed Python requirements before starting the API. Model loading/in
 
 Simulation outputs are educational estimates only and are not a physical fire-spread model, safety certification or operational hazard prediction. Follow approved site emergency procedures and qualified safety guidance.
 
-Game completion currently returns a validated response but is not saved to a database. Do not treat it as durable training progress. No database credentials or production database are configured by this change.
+Successful game completions are saved in `backend/data/suraksha_progress.sqlite3` using Python's built-in SQLite support. The standalone game creates a browser-local learner ID and uses it to retrieve progress across sessions on the same browser. This is local persistence, not account-based identity: clearing browser storage creates a new learner ID, and the API has no authentication or authorization. Do not use this implementation for sensitive learner records or as a production student-account system. Local progress may be lost if the backend data directory is removed.
 
 ## Verification
 
@@ -75,4 +76,4 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5174. The proxy makes the unified API reachable from the game origin. The game UI now checks `/health` and posts successful mission completion to `/game/complete`, mapping its local fire, PPE, spill and remaining missions to the backend's four training IDs. This is a completion validation request only: the API explicitly reports session-only handling and does not persist progress. The game still uses local mission descriptions, action scoring, dashboards and simulator content; mission catalog and detection screens are not yet dynamically backend-driven.
+Open http://localhost:5174. The proxy makes the unified API reachable from the game origin. The game UI checks `/health`, loads the `/game/missions` catalog, requests `/game/scenarios/{mission_id}` details when a mission starts, and posts successful completion to `/game/complete`. It stores a browser-local learner ID and fetches saved results from `/game/progress/{learner_id}`. Local missions are mapped to the backend's four training IDs. SQLite progress is local to the backend installation and is not account-authenticated. The game still uses local mission descriptions, action scoring, dashboards and simulator content; mission catalog and detection screens are not yet dynamically backend-driven.
