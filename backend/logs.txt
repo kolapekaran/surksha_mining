@@ -1,0 +1,2 @@
+{"time": "2026-09-25 12:09:33.988295", "data": {"helmet": false, "vest": false, "fatigue": false, "fire": true, "score": 30}}
+{"time": "2026-09-25 12:11:47.552636", "data": {"helmet": false, "vest": false, "fatigue": false, "fire": true, "score": 30}}
