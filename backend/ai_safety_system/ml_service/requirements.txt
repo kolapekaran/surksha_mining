@@ -1,4 +1,10 @@
 fastapi
-uvicorn
+uvicorn[standard]
+python-multipart
+numpy
 opencv-python
-numpyQQ
+ultralytics
+torch
+torchvision
+joblib
+scikit-learn
