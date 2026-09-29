@@ -1,5 +1,7 @@
 
 import { useState } from "react";
+import SafetyGame from "./safety-game/App";
+import "./safety-game/styles.css";
 
 import { AppProvider } from "./context/appcontext";
 
@@ -29,6 +31,9 @@ function AppContent() {
       case "simulation":
         return <SimulationScreen />;
 
+      case "safety-game":
+        return <SafetyGame />;
+
       default:
         return <CameraScreen />;
     }
@@ -40,6 +45,7 @@ function AppContent() {
     { id: "dashboard", label: "Dashboard" },
     { id: "reports", label: "Reports" },
     { id: "simulation", label: "Simulation" },
+    { id: "safety-game", label: "Safety Training Game" },
   ];
 
   return (
