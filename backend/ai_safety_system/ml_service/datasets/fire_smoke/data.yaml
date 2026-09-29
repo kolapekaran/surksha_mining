@@ -1,8 +1,0 @@
-path: datasets/fire_smoke
-
-train: train/images
-val: valid/images
-test: test/images
-
-nc: 3
-names: ['fire', 'other', 'smoke']
