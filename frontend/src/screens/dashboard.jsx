@@ -15,7 +15,7 @@ function Dashboard() {
   const risk = Number(mlData?.riskScore || 0);
 
   return (
-    <div style={{ padding: "20px", color: "white" }}>
+    <div className="suraksha-screen dashboard-screen" style={{ padding: "20px", color: "white" }}>
       <h1>AI Safety Dashboard</h1>
 
       <h2>🔥 Fire: {fire ? "YES" : "NO"}</h2>
