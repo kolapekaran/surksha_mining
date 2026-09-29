@@ -1,0 +1,29 @@
+name: Package SURAKSHA
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - integration/suraksha-unified
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Create clean source archive
+        run: |
+          mkdir -p dist-package
+          zip -r dist-package/SURAKSHA-integrated-source.zip backend safety-ai-frontend safety-game-frontend INTEGRATION_SETUP.md \
+            -x '*/node_modules/*' '*/.venv/*' '*/__pycache__/*' '*.pyc' \
+               'backend/.env' '*/datasets/*' '*/runs/*' '*/dist/*' '*/build/*'
+      - name: Upload ZIP artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SURAKSHA-integrated-source
+          path: dist-package/SURAKSHA-integrated-source.zip
+          if-no-files-found: error
+          retention-days: 14
