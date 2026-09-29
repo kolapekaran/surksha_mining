@@ -47,7 +47,7 @@ npm ci
 npm run dev
 ```
 
-Open http://localhost:5173. Vite proxies API requests to the FastAPI service on port 8000.
+Open http://localhost:5173. Vite proxies API requests to the FastAPI service on port 8000. The main dashboard's **Safety Training Game** navigation item embeds the standalone game from `http://localhost:5174`.
 
 ## ML status and limitations
 
@@ -76,4 +76,4 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5174. The proxy makes the unified API reachable from the game origin. The game UI checks `/health`, loads the `/game/missions` catalog, requests `/game/scenarios/{mission_id}` details when a mission starts, and posts successful completion to `/game/complete`. It stores a browser-local learner ID and fetches saved results from `/game/progress/{learner_id}`. Local missions are mapped to the backend's four training IDs. SQLite progress is local to the backend installation and is not account-authenticated. The game still uses local mission descriptions, action scoring, dashboards and simulator content; mission catalog and detection screens are not yet dynamically backend-driven.
+Open http://localhost:5174. The proxy makes the unified API reachable from the game origin. Keep this server running while using the embedded game in the main dashboard. For a hosted deployment, build and host this game frontend separately, then set `VITE_SAFETY_GAME_URL` in the main frontend build environment to its URL; the iframe does not bundle the second app into the main Vite build. The game UI checks `/health`, loads the `/game/missions` catalog, requests `/game/scenarios/{mission_id}` details when a mission starts, and posts successful completion to `/game/complete`. It stores a browser-local learner ID and fetches saved results from `/game/progress/{learner_id}`. Local missions are mapped to the backend's four training IDs. SQLite progress is local to the backend installation and is not account-authenticated. The game still uses local mission descriptions, action scoring, dashboards and simulator content; mission catalog and detection screens are not yet dynamically backend-driven.
