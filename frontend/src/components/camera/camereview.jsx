@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { detectSafety } from "../../services/api";
+import { analyzeFrame } from "../../services/api";
 import { useAppContext } from "../../context/appcontext";
 
 function CameraView() {
@@ -15,76 +15,105 @@ function CameraView() {
 
   const [cameraActive, setCameraActive] = useState(false);
 
-  // 🔥 START CAMERA
   const startCamera = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    videoRef.current.srcObject = stream;
-    streamRef.current = stream;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: false,
+      });
 
-    setCameraActive(true);
-    setCameraStatus("ACTIVE");
-    setSystemStatus("MONITORING");
+      videoRef.current.srcObject = stream;
+      streamRef.current = stream;
+
+      setCameraActive(true);
+      setCameraStatus("ACTIVE");
+      setSystemStatus("MONITORING");
+    } catch (error) {
+      console.error("Camera error:", error);
+      setSystemStatus("CAMERA ERROR");
+    }
   };
 
-  // 🔥 STOP CAMERA
   const stopCamera = () => {
-    streamRef.current?.getTracks().forEach(t => t.stop());
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
+
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+
     setCameraActive(false);
     setCameraStatus("INACTIVE");
   };
 
-  // 🔥 AUTO DETECTION
   const detectFrame = async () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
 
-    if (!video || video.videoWidth === 0) return;
+    if (!video || !canvas || video.videoWidth === 0) return;
 
-    const ctx = canvas.getContext("2d");
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
 
-    ctx.drawImage(video, 0, 0);
+    const context = canvas.getContext("2d");
+    if (!context) return;
 
-    const blob = await new Promise(resolve =>
-      canvas.toBlob(resolve, "image/jpeg")
-    );
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    const data = await detectSafety(blob);
-    if (!data) return;
+    const frame = canvas.toDataURL("image/jpeg", 0.82);
 
-    let risk = 0;
-    if (data.fire) risk += 70;
-    if (!data.ppe) risk += 40;
-    if (data.fatigue) risk += 30;
-    if (risk > 100) risk = 100;
+    try {
+      const data = await analyzeFrame(frame);
+      if (!data) return;
 
-    setMlData({
-      fire: data.fire,
-      ppe: data.ppe,
-      fatigue: data.fatigue,
-      riskScore: risk,
-    });
+      let risk = 0;
+      if (data.fire) risk += 70;
+      if (!data.ppe) risk += 40;
+      if (data.fatigue) risk += 30;
+
+      setMlData({
+        fire: Boolean(data.fire),
+        ppe: Boolean(data.ppe),
+        fatigue: Boolean(data.fatigue),
+        riskScore: Math.min(100, risk),
+      });
+    } catch (error) {
+      console.error("ML detection error:", error);
+      setSystemStatus("AI ERROR");
+    }
   };
 
-  // 🔥 AUTO LOOP
   useEffect(() => {
-    if (!cameraActive) return;
+    if (!cameraActive) return undefined;
 
-    const interval = setInterval(() => {
-      detectFrame();
-    }, 2000);
+    const interval = setInterval(detectFrame, 2000);
 
     return () => clearInterval(interval);
   }, [cameraActive]);
 
+  useEffect(() => {
+    return () => {
+      streamRef.current?.getTracks().forEach((track) => track.stop());
+    };
+  }, []);
+
   return (
     <div>
-      <video ref={videoRef} autoPlay style={{ width: "100%" }} />
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        muted
+        style={{ width: "100%" }}
+      />
       <canvas ref={canvasRef} style={{ display: "none" }} />
 
-      <button onClick={startCamera}>Start</button>
-      <button onClick={stopCamera}>Stop</button>
+      <button onClick={startCamera} disabled={cameraActive}>
+        Start
+      </button>
+      <button onClick={stopCamera} disabled={!cameraActive}>
+        Stop
+      </button>
     </div>
   );
 }
