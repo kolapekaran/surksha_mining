@@ -13,8 +13,8 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 - `GET /` and `GET /health`: API health.
-- `GET /detect/status`: configured model files and integration status.
-- `POST /detect/all`: upload an image using multipart field `file`; runs the current fire and PPE inference functions.
+- `GET /status`: configured model files and integration status.
+- `POST /detect/all`: upload an image using multipart field `file`; runs the current fire and helmet-presence inference functions; ppe: true means no helmet was detected, not a complete PPE compliance audit.
 - `/simulation`: existing simulation application.
 
 ML inference requires the configured model files and compatible runtime dependencies. Fatigue inference is explicitly reported as unavailable until its model inference implementation is integrated. An inference error returns HTTP 503 rather than fabricated detections.
