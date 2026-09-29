@@ -16,7 +16,7 @@ import {
 
 import {
   useAppContext,
-} from "../../context/appcontext";
+} from "../context/appcontext";
 
 
 // ------------------------------------
@@ -130,6 +130,7 @@ function CameraView() {
 
     alerts,
     setAlerts,
+    setMlData,
 
     setCameraStatus,
     setSystemStatus,
@@ -187,6 +188,22 @@ function CameraView() {
     result
   ) => {
     setLastResult(result);
+
+    const fire = Boolean(result?.fire);
+    const ppe = Boolean(result?.ppe);
+    const fatigue = Boolean(result?.fatigue);
+
+    setMlData({
+      fire,
+      ppe,
+      fatigue,
+      riskScore: Math.min(
+        100,
+        (fire ? 70 : 0) +
+          (!ppe ? 40 : 0) +
+          (fatigue ? 30 : 0)
+      ),
+    });
 
     const nextDetections =
       resultToDetections(result);
