@@ -83,6 +83,7 @@ function RiskMeter({ detections = [], risk = null }) {
 
   return (
     <div
+      className="sx-risk-meter"
       style={{
         width: "100%",
         marginTop: "15px",
@@ -94,7 +95,8 @@ function RiskMeter({ detections = [], risk = null }) {
       }}
     >
       <div
-        style={{
+          className="sx-risk-fill"
+          style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
