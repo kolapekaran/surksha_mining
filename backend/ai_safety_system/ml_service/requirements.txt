@@ -1,4 +1,6 @@
 fastapi
-uvicorn
-opencv-python
-numpyQQ
+uvicorn[standard]
+opencv-python-headless
+numpy
+ultralytics
+python-multipart
