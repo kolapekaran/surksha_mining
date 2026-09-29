@@ -1,33 +1,28 @@
-import os
+from __future__ import annotations
 
-# 🔥 Example (later replace with YOLO real models)
-def run_detection_system():
-    """
-    FINAL ML ENTRY FUNCTION
-    """
+from typing import Any
 
-    # 🔴 TODO: replace with real detection
-    helmet = False
-    vest = False
-    fatigue = False
-    fire = True
+from ai_safety_system.ml_service.inference.detect_all import detect_all
+from ai_safety_system.ml_service.inference.predict_risk import get_risk_score
 
-    # 🔥 basic score logic
-    score = 0
 
-    if not helmet:
-        score += 10
-    if not vest:
-        score += 10
-    if fatigue:
-        score += 10
-    if fire:
-        score += 10
+def run_detection_system(frame=None) -> dict[str, Any]:
+    if frame is None:
+        return {
+            "helmet": False,
+            "vest": False,
+            "fatigue": False,
+            "fire": False,
+            "score": 0,
+            "model_status": "NO_FRAME",
+        }
 
-    return {
-        "helmet": helmet,
-        "vest": vest,
-        "fatigue": fatigue,
-        "fire": fire,
-        "score": score
-    }
+    result = detect_all(frame)
+    risk = get_risk_score({
+        "helmet": result.get("helmet", False),
+        "vest": result.get("vest", False),
+        "fatigue": result.get("fatigue", False),
+        "fire": result.get("fire", False),
+    })
+
+    return {**result, "risk": risk, "score": risk["score"]}
