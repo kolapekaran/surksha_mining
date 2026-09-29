@@ -126,6 +126,7 @@ function ReportScreen() {
 
   return (
     <div
+      className="suraksha-screen report-screen"
       style={{
         minHeight: "100vh",
         width: "100%",
