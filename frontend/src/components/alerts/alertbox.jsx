@@ -15,6 +15,7 @@ function AlertBox({ alert, onClose }) {
 
   return (
     <div
+      className="sx-alert-box"
       style={{
         width: "100%",
         padding: "16px",
