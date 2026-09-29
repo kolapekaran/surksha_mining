@@ -16,7 +16,7 @@ export default defineConfig({
       // --------------------------
 
       "/api": {
-        target: "http://127.0.0.1:5000",
+        target: "http://127.0.0.1:8000",
         changeOrigin: true,
       },
 
@@ -25,7 +25,7 @@ export default defineConfig({
       // --------------------------
 
       "/health": {
-        target: "http://127.0.0.1:5000",
+        target: "http://127.0.0.1:8000",
         changeOrigin: true,
       },
 
@@ -35,7 +35,7 @@ export default defineConfig({
       // --------------------------
 
       "/detect": {
-        target: "http://127.0.0.1:5000",
+        target: "http://127.0.0.1:8000",
         changeOrigin: true,
       },
 
@@ -44,7 +44,7 @@ export default defineConfig({
       // --------------------------
 
       "/socket.io": {
-        target: "http://127.0.0.1:5000",
+        target: "http://127.0.0.1:8000",
 
         changeOrigin: true,
 
