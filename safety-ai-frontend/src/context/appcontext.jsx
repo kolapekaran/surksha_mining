@@ -27,6 +27,8 @@ export function AppProvider({ children }) {
   const [backendOnline, setBackendOnline] =
     useState(false);
 
+  const [mlData, setMlData] = useState(null);
+
   // -----------------------------
   // CHECK BACKEND
   // -----------------------------
@@ -71,6 +73,13 @@ export function AppProvider({ children }) {
         }
 
         setSystemStatus("READY");
+
+        try {
+          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"}/ml/health`);
+          if (response.ok) setMlData(await response.json());
+        } catch (_) {
+          setMlData(null);
+        }
       } catch (error) {
         console.error(
           "Backend connection error:",
@@ -116,6 +125,8 @@ export function AppProvider({ children }) {
         setSystemStatus,
 
         backendOnline,
+        mlData,
+        setMlData,
 
         clearSafetyData,
       }}
